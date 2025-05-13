@@ -977,4 +977,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tasksContainer.classList.remove("hidden");
   }
+
+    // === Gratitude Log Logic ===
+
+  const gratitudeInput = document.getElementById("gratitude-input");
+  const viewLogButton = document.getElementById("view-gratitude-log");
+  const closeLogButton = document.getElementById("close-gratitude-log");
+  const gratitudeLogModal = document.getElementById("gratitude-log-modal");
+  const gratitudeList = document.getElementById("gratitude-list");
+
+  const saveButton = document.getElementById("save-gratitude");
+
+  saveButton.addEventListener("click", () => {
+    const entry = gratitudeInput.value.trim();
+    if (!entry) return;
+
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    chrome.storage.local.get({ gratitudeLog: [] }, (data) => {
+      const log = data.gratitudeLog || [];
+
+      const existingIndex = log.findIndex((item) => item.date === today);
+      if (existingIndex >= 0) {
+        log[existingIndex].entries.push(entry);
+      } else {
+        log.push({ date: today, entries: [entry] });
+      }
+
+      chrome.storage.local.set({ gratitudeLog: log }, () => {
+        showSpeechBubble("Saved to your log! 📝");
+      });
+    });
+  });
+
+
+  // Load gratitude input if already saved for today
+  window.addEventListener("DOMContentLoaded", () => {
+    const today = new Date().toISOString().split("T")[0];
+    chrome.storage.local.get({ gratitudeLog: [] }, (data) => {
+      const todayEntry = data.gratitudeLog.find((item) => item.date === today);
+      if (todayEntry) {
+        gratitudeInput.value = todayEntry.text;
+      }
+    });
+  });
+
+  // Open the gratitude log
+  viewLogButton.addEventListener("click", () => {
+    chrome.storage.local.get({ gratitudeLog: [] }, (data) => {
+      gratitudeList.innerHTML = "";
+
+      data.gratitudeLog
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // most recent first
+        .forEach((entry) => {
+          const li = document.createElement("li");
+          entry.entries.forEach(text => {
+            const li = document.createElement("li");
+            li.textContent = `${entry.date}: ${text}`;
+            gratitudeList.appendChild(li);
+          });
+          gratitudeList.appendChild(li);
+        });
+
+      gratitudeLogModal.classList.remove("hidden");
+    });
+  });
+
+  // Close the modal
+  closeLogButton.addEventListener("click", () => {
+    gratitudeLogModal.classList.add("hidden");
+  });
+
+
 });
