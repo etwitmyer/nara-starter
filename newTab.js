@@ -251,6 +251,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function showSpeechBubble(message) {
+    const bubble = document.getElementById("speech-bubble");
+    bubble.textContent = message;
+    bubble.classList.remove("hidden");
+    bubble.classList.add("show");
+  
+    setTimeout(() => {
+      bubble.classList.remove("show");
+      bubble.classList.add("hidden");
+    }, 2000); // 2 seconds
+  }
+
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -674,6 +686,22 @@ document.addEventListener("DOMContentLoaded", () => {
           const deleteButton = taskItem.querySelector(".delete-task");
           if (deleteButton) deleteButton.remove();
         }
+
+        if (tasks[originalIndex].completed) {
+          const encouragements = [
+            "Nice job!",
+            "You're doing great!",
+            "Keep it up!",
+            "Another one done!",
+            "You're amazing!",
+            "Small wins matter!",
+            "Great progress!",
+            "Way to go!",
+          ];
+          const randomMessage =
+            encouragements[Math.floor(Math.random() * encouragements.length)];
+          showSpeechBubble(randomMessage);
+        }      
 
         let newPosition = 0;
         if (checkbox.checked) {
